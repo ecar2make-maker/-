@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>취이즈</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+
+:root {
+  --ink: #131315;
+  --ink-soft: #3a3a3f;
+  --muted: #7a7a83;
+  --faint: #b3b3ba;
+  --card: #ffffff;
+  --line: #e7e7ec;
+  --bg-a: #dce6f7;
+  --bg-b: #f4f2ec;
+  --bg-c: #e3ecd8;
+  --accent: #2f3ee0;
+  --accent-soft: #eef0ff;
+  --like: #131315;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f6f5f1;
+  background-image:
+    radial-gradient(circle at 6% 6%, var(--bg-a) 0%, transparent 46%),
+    radial-gradient(circle at 96% 4%, var(--bg-b) 0%, transparent 40%),
+    radial-gradient(circle at 100% 96%, var(--bg-c) 0%, transparent 48%),
+    radial-gradient(circle at 0% 100%, var(--bg-a) 0%, transparent 42%);
+  background-attachment: fixed;
+}
+
+button, input, textarea, select { font-family: inherit; }
+button { cursor: pointer; }
+
+.app { min-height: 100vh; padding-bottom: 96px; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 50; height: 64px;
+  display: flex; align-items: center; padding: 0 20px;
+  background: rgba(246,245,241,.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  color: var(--ink);
+  font-weight: 900; font-size: 20px; letter-spacing: -0.6px;
+  display: flex; align-items: center; gap: 7px;
+}
+
+.container { width: min(100% - 28px, 680px); margin: auto; padding-top: 32px; }
+
+.page-title { margin-bottom: 22px; }
+.page-title small { color: var(--muted); font-weight: 800; font-size: 11px; letter-spacing: 2px; }
+.page-title h1 { margin: 6px 0 8px; font-size: 30px; font-weight: 900; letter-spacing: -1.2px; line-height: 1.2; color: var(--ink); }
+.page-title p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+.feed-info {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--card); color: var(--ink-soft);
+  border: 1px solid var(--line);
+  padding: 13px 15px; border-radius: 14px; margin-bottom: 16px;
+  font-size: 12px; font-weight: 700;
+}
+.refresh { border: 0; background: transparent; color: var(--accent); display: flex; align-items: center; gap: 5px; font-weight: 800; }
+
+.post {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 18px; overflow: hidden; margin-bottom: 18px;
+}
+
+.post-header { display: flex; align-items: center; padding: 14px 15px; gap: 10px; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
+.author { flex: 1; }
+.author strong { font-size: 14px; font-weight: 800; color: var(--ink); }
+.author p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+.category { background: var(--accent-soft); border: 1px solid transparent; color: var(--accent); padding: 6px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; }
+
+.post-image-wrap { position: relative; aspect-ratio: 4/3; background: #eee; }
+.post-image { width: 100%; height: 100%; object-fit: cover; }
+.hobby-label { position: absolute; bottom: 12px; left: 12px; background: rgba(19,19,21,.72); color: #fff; padding: 7px 11px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: -0.2px; }
+
+.actions { display: flex; padding: 12px 14px 3px; }
+.action { border: 0; background: transparent; color: var(--muted); display: flex; align-items: center; gap: 5px; padding: 5px; font-weight: 800; }
+.action-icon { font-size: 18px; line-height: 1; }
+.action.like.active { color: var(--like); }
+.action.bookmark { margin-left: auto; }
+.action.bookmark.active { color: var(--accent); }
+
+.caption { padding: 6px 16px; margin: 0; font-size: 13px; line-height: 1.65; color: var(--ink-soft); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 16px 17px; color: var(--accent); font-size: 12px; font-weight: 700; }
+
+.search-box { display: flex; align-items: center; gap: 9px; height: 52px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0 15px; color: var(--muted); }
+.search-box input { flex: 1; border: 0; outline: none; font-size: 14px; background: transparent; color: var(--ink); }
+.clear-x { cursor: pointer; color: var(--muted); }
+
+.history-title { margin: 26px 0 12px; font-size: 13px; font-weight: 800; letter-spacing: .5px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--card); color: var(--ink-soft); padding: 8px 13px; border-radius: 30px; font-weight: 700; font-size: 13px; }
+
+.result-title { margin: 26px 0 14px; color: var(--muted); font-size: 13px; }
+.result-title strong { color: var(--ink); }
+
+.empty { text-align: center; padding: 64px 20px; border: 1px dashed var(--line); border-radius: 18px; background: var(--card); }
+.empty div { font-size: 34px; }
+.empty h3 { margin-bottom: 6px; font-weight: 900; letter-spacing: -0.4px; color: var(--ink); }
+.empty p { color: var(--muted); font-size: 13px; }
+
+.profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.profile-picture { width: 76px; height: 76px; border-radius: 20px; object-fit: cover; border: 1px solid var(--line); }
+.profile-info small { color: var(--muted); font-weight: 800; font-size: 11px; letter-spacing: 2px; }
+.profile-info h1 { margin: 5px 0; font-size: 24px; font-weight: 900; letter-spacing: -1px; color: var(--ink); }
+.profile-info p { color: var(--muted); font-size: 12px; margin: 0; }
+
+.profile-box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 26px; }
+.profile-box h3 { font-size: 12px; font-weight: 800; letter-spacing: .5px; color: var(--muted); margin: 4px 0 10px; }
+.profile-chip { display: inline-block; margin: 3px; padding: 7px 11px; background: var(--ink); color: #fff; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.profile-chip.hobby { background: var(--accent-soft); color: var(--accent); }
+
+.record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.record-header h2 { font-size: 20px; font-weight: 900; letter-spacing: -0.6px; color: var(--ink); }
+
+.add-button { border: 0; background: var(--ink); color: #fff; font-weight: 800; padding: 10px 13px; border-radius: 12px; display: flex; align-items: center; gap: 5px; font-size: 13px; }
+.edit-button { border: 1px solid var(--line); background: var(--card); color: var(--ink); font-weight: 800; padding: 10px 13px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; }
+.edit-area { background: var(--card); border: 1px solid var(--line); padding: 18px; border-radius: 16px; margin-bottom: 22px; }
+.category-edit { margin-bottom: 18px; }
+.category-edit strong { display: block; margin-bottom: 8px; color: var(--ink); font-weight: 800; }
+.select-chip { border: 1px solid var(--line); background: var(--card); color: var(--ink-soft); margin: 3px; padding: 7px 11px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+.select-chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.bottom-nav {
+  position: fixed; z-index: 60; bottom: 12px; left: 50%; transform: translateX(-50%);
+  width: min(calc(100% - 20px), 550px); padding: 6px; display: grid; grid-template-columns: repeat(4,1fr);
+  background: rgba(255,255,255,.92); border: 1px solid var(--line); border-radius: 20px;
+  box-shadow: 0 14px 34px rgba(19,19,21,.1);
+  backdrop-filter: blur(14px);
+}
+.nav { border: 0; background: transparent; color: var(--muted); padding: 9px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-weight: 700; }
+.nav-icon { font-size: 18px; line-height: 1; }
+.nav-label { font-size: 10px; }
+.nav.active { background: var(--ink); color: #fff; }
+
+.onboarding { min-height: 100vh; display: flex; justify-content: center; padding: 50px 16px; }
+.onboard-box { width: min(100%,600px); }
+.onboard-logo { color: var(--ink); font-weight: 900; font-size: 18px; margin-bottom: 54px; display: flex; align-items: center; gap: 7px; }
+.onboard-box h1 { font-size: 38px; font-weight: 900; line-height: 1.2; letter-spacing: -1.6px; color: var(--ink); }
+.onboard-box > p { color: var(--muted); line-height: 1.6; font-size: 14px; }
+
+.category-card { position: relative; width: 100%; display: flex; align-items: center; border: 1px solid var(--line); background: var(--card); padding: 15px; margin: 9px 0; border-radius: 16px; text-align: left; }
+.category-card.active { border: 1.5px solid var(--ink); background: var(--accent-soft); }
+.category-card .emoji { font-size: 24px; margin-right: 13px; }
+.category-card strong { display: block; color: var(--ink); font-weight: 800; }
+.category-card small { color: var(--muted); }
+
+.start-button { width: 100%; border: 0; background: var(--ink); color: #fff; padding: 16px; border-radius: 14px; margin-top: 22px; font-weight: 800; font-size: 14px; }
+.start-button:disabled { opacity: .3; }
+
+.modal-bg { position: fixed; inset: 0; z-index: 100; background: rgba(19,19,21,.5); display: grid; place-items: center; padding: 15px; }
+.modal { position: relative; width: min(100%,500px); background: var(--card); border-radius: 20px; padding: 22px; max-height: 90vh; overflow-y: auto; }
+.modal-top { display: flex; justify-content: space-between; }
+.modal-top small { color: var(--muted); font-weight: 800; letter-spacing: 1.5px; font-size: 11px; }
+.modal-top h2 { font-weight: 900; letter-spacing: -0.6px; color: var(--ink); margin: 5px 0; font-size: 20px; }
+.modal-top button { border: 0; background: transparent; color: var(--muted); font-size: 16px; }
+
+.form label { display: block; font-size: 12px; font-weight: 800; color: var(--ink-soft); margin: 15px 0 6px; }
+.form select, .form textarea, .form input { width: 100%; padding: 11px; border: 1px solid var(--line); border-radius: 10px; background: #fafafa; color: var(--ink); font-size: 13px; }
+.form textarea { resize: vertical; }
+
+.upload { margin-top: 17px; width: 100%; padding: 14px; border: 0; border-radius: 12px; background: var(--ink); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const CATEGORIES = {
+  운동: ["클라이밍", "러닝", "수영", "요가", "배드민턴"],
+  예술: ["드로잉", "수채화", "사진", "캘리그라피", "도예"],
+  악기: ["바이올린", "피아노", "기타", "드럼", "우쿨렐레"],
+  공예: ["종이접기", "뜨개질", "비즈공예", "가죽공예", "미니어처"],
+};
+
+const CATEGORY_EMOJI = { 운동: "🧗", 예술: "🎨", 악기: "🎻", 공예: "🧶" };
+
+const INITIAL_USER = {
+  id: "user1",
+  nickname: "취미탐험가",
+  profileImage: "https://i.pravatar.cc/150?img=47",
+  joinedAt: "2026.08.29",
+  categories: [],
+  hobbies: ["클라이밍", "종이접기"],
+};
+
+const INITIAL_POSTS = [
+  { id: 1, authorId: "user2", author: "산타는토끼", avatar: "https://i.pravatar.cc/100?img=12", category: "운동", hobby: "클라이밍", caption: "오늘은 처음으로 V2 완등! 한 동작씩 해결되는 맛 때문에 계속 하게 돼요.", image: "https://images.unsplash.com/photo-1522163182402-834f871fd851?auto=format&fit=crop&w=1000&q=80", date: "8월 29일", likes: 128, liked: false, bookmarked: true, hashtags: ["클라이밍", "운동취미", "주말취미"] },
+  { id: 2, authorId: "user3", author: "손끝공방", avatar: "https://i.pravatar.cc/100?img=32", category: "공예", hobby: "종이접기", caption: "한 장으로 만든 작은 작품. 완성작을 모아두니 연습 과정까지 기록돼서 좋아요.", image: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?auto=format&fit=crop&w=1000&q=80", date: "8월 28일", likes: 84, liked: true, bookmarked: false, hashtags: ["종이접기", "공예", "취미기록"] },
+  { id: 3, authorId: "user4", author: "현의하루", avatar: "https://i.pravatar.cc/100?img=5", category: "악기", hobby: "바이올린", caption: "매일 20분씩 연습한 지 한 달. 짧게라도 기록하니까 훨씬 꾸준히 하게 됩니다.", image: "https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?auto=format&fit=crop&w=1000&q=80", date: "8월 27일", likes: 203, liked: false, bookmarked: true, hashtags: ["바이올린", "악기", "연습기록"] },
+  { id: 4, authorId: "user1", author: "취미탐험가", avatar: "https://i.pravatar.cc/150?img=47", category: "공예", hobby: "종이접기", caption: "이번 주에 접은 꽃 모음. 같은 방법도 색에 따라 분위기가 완전히 달라져요.", image: "https://images.unsplash.com/photo-1583267746897-2cf415887172?auto=format&fit=crop&w=1000&q=80", date: "8월 26일", likes: 41, liked: false, bookmarked: false, hashtags: ["종이접기", "꽃접기", "나의취미"] },
+];
+
+const RANDOM_AUTHORS = ["초록달팽이", "단발머리", "몽글몽글", "해피데이즈", "느긋한오후", "작은우주", "보통의날", "봄날편지", "고요한숲", "라라랜드", "하늘거울", "꿈꾸는고양이", "말랑말랑", "작심삼일", "오늘의기록", "산책자", "네모난달", "조용한아침", "별빛수집가", "커피한잔", "느린걸음", "작은정원", "하루하루"];
+
+const CAPTION_POOL = {
+  운동: [
+    "오늘도 {hobby} 하러 다녀왔어요. 몸은 힘든데 마음은 개운하네요.",
+    "{hobby} 시작한 지 벌써 두 달째, 조금씩 늘고 있는 게 느껴져요.",
+    "날씨 좋은 날엔 역시 {hobby}만 한 게 없죠.",
+    "꾸준히 {hobby} 기록 남기는 중입니다. 작은 성취가 쌓이는 느낌!",
+  ],
+  예술: [
+    "요즘 {hobby}에 푹 빠져 있어요. 하나씩 완성할 때마다 뿌듯해요.",
+    "오랜만에 {hobby} 작업했는데 역시 손이 기억하네요.",
+    "{hobby}로 오늘의 감정을 남겨봤어요.",
+    "조금 서툴러도 제 {hobby} 작품이 제일 마음에 들어요.",
+  ],
+  악기: [
+    "오늘 연습한 {hobby}, 조금씩 손에 익어가는 중이에요.",
+    "{hobby} 연습 기록! 매일 조금씩이라도 남겨보려고요.",
+    "좋아하는 곡을 {hobby}로 연주해봤어요.",
+    "연습실에서 {hobby} 연습하고 왔습니다. 뿌듯한 하루.",
+  ],
+  공예: [
+    "{hobby}로 만든 작은 소품이에요. 선물하려고 만들었어요.",
+    "오늘의 {hobby} 결과물! 시간 가는 줄 몰랐네요.",
+    "{hobby} 하면서 마음이 차분해지는 걸 느껴요.",
+    "처음 시도해본 {hobby}, 생각보다 재미있어요.",
+  ],
+};
+
+const EXTRA_TAGS = ["취미기록", "취미스타그램", "오늘의취미", "기록챌린지", "힐링루틴"];
+
+function generateRandomExtraPosts(count) {
+  const cats = Object.keys(CATEGORIES);
+  const extras = [];
+  for (let i = 0; i < count; i++) {
+    const category = cats[Math.floor(Math.random() * cats.length)];
+    const hobbyList = CATEGORIES[category];
+    const hobby = hobbyList[Math.floor(Math.random() * hobbyList.length)];
+    const captionTpl = CAPTION_POOL[category][Math.floor(Math.random() * CAPTION_POOL[category].length)];
+    extras.push({
+      id: 100 + i,
+      authorId: "user" + (200 + i),
+      author: RANDOM_AUTHORS[i % RANDOM_AUTHORS.length],
+      avatar: `https://i.pravatar.cc/100?img=${((i * 7 + 3) % 70) + 1}`,
+      category,
+      hobby,
+      caption: captionTpl.replace("{hobby}", hobby),
+      image: `https://picsum.photos/seed/chiiz-${category}-${i}/900/700`,
+      date: `8월 ${Math.floor(Math.random() * 28) + 1}일`,
+      likes: Math.floor(Math.random() * 260) + 2,
+      liked: Math.random() < 0.3,
+      bookmarked: Math.random() < 0.25,
+      hashtags: [hobby, category, EXTRA_TAGS[Math.floor(Math.random() * EXTRA_TAGS.length)]],
+    });
+  }
+  return extras;
+}
+
+generateRandomExtraPosts(23).forEach((p) => INITIAL_POSTS.push(p));
+
+let state = {
+  onboarded: false,
+  tab: "feed",
+  user: JSON.parse(JSON.stringify(INITIAL_USER)),
+  posts: JSON.parse(JSON.stringify(INITIAL_POSTS)),
+  history: ["클라이밍", "바이올린", "종이접기"],
+  refresh: false,
+  searchInput: "",
+  searchQuery: "",
+  editingProfile: false,
+  creatingPost: false,
+  newPost: { category: "운동", hobby: "클라이밍", caption: "", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1000&q=80" },
+};
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (s) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
+}
+
+function toggleArrayField(obj, key, value) {
+  obj[key] = obj[key].includes(value) ? obj[key].filter((x) => x !== value) : [...obj[key], value];
+}
+
+function toggleLike(id) {
+  state.posts = state.posts.map((p) => (p.id === id ? { ...p, liked: !p.liked, likes: p.likes + (p.liked ? -1 : 1) } : p));
+}
+
+function toggleBookmark(id) {
+  state.posts = state.posts.map((p) => (p.id === id ? { ...p, bookmarked: !p.bookmarked } : p));
+}
+
+function doSearch(value) {
+  value = value.trim();
+  if (!value) return;
+  state.searchInput = value;
+  state.searchQuery = value;
+  state.history = [value, ...state.history.filter((h) => h !== value)];
+}
+
+function openCreatePost() {
+  const cat = state.user.categories[0] || "운동";
+  state.newPost = { category: cat, hobby: CATEGORIES[cat][0], caption: "", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1000&q=80" };
+  state.creatingPost = true;
+}
+
+function submitNewPost() {
+  if (!state.newPost.caption.trim()) return;
+  const np = {
+    id: Date.now(),
+    authorId: state.user.id,
+    author: state.user.nickname,
+    avatar: state.user.profileImage,
+    category: state.newPost.category,
+    hobby: state.newPost.hobby,
+    caption: state.newPost.caption,
+    image: state.newPost.image,
+    date: new Date().toLocaleDateString("ko-KR", { month: "long", day: "numeric" }),
+    likes: 0,
+    liked: false,
+    bookmarked: false,
+    hashtags: [state.newPost.hobby, state.newPost.category, "취미기록"],
+  };
+  state.posts = [np, ...state.posts];
+  state.creatingPost = false;
+  render();
+}
+
+function scorePost(p, ctx) {
+  let score = 0;
+  if (ctx.likedHobbies.has(p.hobby)) score += 4;
+  if (ctx.likedCategories.has(p.category)) score += 3;
+  if (ctx.bookmarkedHobbies.has(p.hobby)) score += 2;
+  if (ctx.bookmarkedCategories.has(p.category)) score += 1.5;
+  if (ctx.interestCategories.has(p.category)) score += 1;
+  score += p.hashtags.filter((t) => ctx.likedTags.has(t)).length * 0.5;
+  return score;
+}
+
+function orderPostsForFeed(posts) {
+  // 좋아요/북마크/관심 카테고리를 가중치로 점수화해서 자체 알고리즘으로 정렬 (API 불필요)
+  const liked = posts.filter((p) => p.liked);
+  const bookmarked = posts.filter((p) => p.bookmarked);
+  const ctx = {
+    likedCategories: new Set(liked.map((p) => p.category)),
+    likedHobbies: new Set(liked.map((p) => p.hobby)),
+    bookmarkedCategories: new Set(bookmarked.map((p) => p.category)),
+    bookmarkedHobbies: new Set(bookmarked.map((p) => p.hobby)),
+    interestCategories: new Set(state.user.categories),
+    likedTags: new Set(liked.flatMap((p) => p.hashtags)),
+  };
+
+  return [...posts].sort((a, b) => scorePost(b, ctx) - scorePost(a, ctx));
+}
+
+function renderPost(post) {
+  return `
+  <article class="post" data-id="${post.id}">
+    <div class="post-header">
+      <img src="${post.avatar}" class="avatar" alt="" />
+      <div class="author"><strong>${escapeHtml(post.author)}</strong><p>${escapeHtml(post.hobby)} · ${escapeHtml(post.date)}</p></div>
+      <span class="category">${escapeHtml(post.category)}</span>
+    </div>
+    <div class="post-image-wrap">
+      <img class="post-image" src="${post.image}" alt="${escapeHtml(post.hobby)} 취미" />
+      <span class="hobby-label">#${escapeHtml(post.hobby)}</span>
+    </div>
+    <div class="actions">
+      <button class="action like ${post.liked ? "active" : ""}" data-action="toggle-like" data-id="${post.id}">
+        <span class="action-icon">♥</span> ${post.likes}
+      </button>
+      <button class="action bookmark ${post.bookmarked ? "active" : ""}" data-action="toggle-bookmark" data-id="${post.id}">
+        <span class="action-icon">🔖</span>
+      </button>
+    </div>
+    <p class="caption"><strong>${escapeHtml(post.author)}</strong> ${escapeHtml(post.caption)}</p>
+    <div class="tags">${post.hashtags.map((t) => `<span>#${escapeHtml(t)}</span>`).join("")}</div>
+  </article>`;
+}
+
+function renderOnboarding() {
+  return `
+  <div class="onboarding">
+    <div class="onboard-box">
+      <div class="onboard-logo"><span>🧀</span> 취이즈</div>
+      <small>나의 관심 취미 설정</small>
+      <h1>어떤 취미가<br/>끌리시나요?</h1>
+      <p>관심 있는 분야를 골라주세요.<br/>취이즈가 관련 취미 기록을 먼저 보여드려요.</p>
+      ${Object.keys(CATEGORIES)
+        .map(
+          (c) => `
+        <button class="category-card ${state.user.categories.includes(c) ? "active" : ""}" data-action="toggle-onboard-category" data-value="${c}">
+          <span class="emoji">${CATEGORY_EMOJI[c]}</span>
+          <div><strong>${c}</strong><small>${CATEGORIES[c].slice(0, 3).join(" · ")}</small></div>
+        </button>`
+        )
+        .join("")}
+      <button class="start-button" ${state.user.categories.length ? "" : "disabled"} data-action="finish-onboarding">취미 피드 시작하기</button>
+    </div>
+  </div>`;
+}
+
+function renderFeed() {
+  const recommended = orderPostsForFeed(state.posts);
+
+  return `
+    <div class="page-title">
+      <small>FOR YOU</small>
+      <h1>오늘의 취미 피드</h1>
+      <p>관심 분야와 관련된 새로운 취미 기록을 만나보세요.</p>
+    </div>
+    <div class="feed-info">
+      <span>🧀 ${state.user.categories.join(" · ")} 중심으로 추천 중</span>
+      <button class="refresh" data-action="toggle-refresh"><span>⟳</span> 새로고침</button>
+    </div>
+    ${recommended.map(renderPost).join("")}
+  `;
+}
+
+function renderSearch() {
+  const q = state.searchQuery;
+  const results = q
+    ? state.posts.filter((post) => {
+        const text = [post.category, post.hobby, post.caption, ...post.hashtags].join(" ").toLowerCase();
+        return text.includes(q.replace("#", "").toLowerCase());
+      })
+    : [];
+
+  return `
+    <div class="page-title">
+      <small>EXPLORE</small>
+      <h1>취미 검색</h1>
+      <p>새로운 취미와 다른 사람들의 기록을 찾아보세요.</p>
+    </div>
+    <form class="search-box" data-action="search-submit">
+      <span>🔍</span>
+      <input id="search-input" placeholder="클라이밍, 공예, 바이올린..." value="${escapeHtml(state.searchInput)}" data-field="searchInput" />
+      ${state.searchInput ? `<span class="clear-x" data-action="clear-search">✕</span>` : ""}
+    </form>
+    ${
+      !q
+        ? `
+      <h3 class="history-title">최근 검색어</h3>
+      <div class="chips">
+        ${state.history.map((h) => `<button class="chip" data-action="search-history" data-value="${escapeHtml(h)}">${escapeHtml(h)}</button>`).join("")}
+      </div>`
+        : `
+      <div class="result-title"><strong>'${escapeHtml(q)}'</strong> 검색 결과 ${results.length}개</div>
+      ${
+        results.length
+          ? results.map(renderPost).join("")
+          : `<div class="empty"><div>🧀</div><h3>관련 취미 기록이 없어요</h3><p>다른 취미 이름으로 검색해 보세요.</p></div>`
+      }`
+    }
+  `;
+}
+
+function renderBookmark() {
+  const saved = state.posts.filter((p) => p.bookmarked);
+  return `
+    <div class="page-title">
+      <small>SAVED</small>
+      <h1>북마크</h1>
+      <p>마음에 들었던 취미 기록을 다시 확인할 수 있어요.</p>
+    </div>
+    ${
+      saved.length
+        ? saved.map(renderPost).join("")
+        : `<div class="empty"><div>🧀</div><h3>저장한 게시물이 없어요</h3><p>피드에서 관심 있는 취미를 북마크해 보세요.</p></div>`
+    }
+  `;
+}
+
+function renderProfile() {
+  const myPosts = state.posts.filter((p) => p.authorId === state.user.id);
+
+  const editArea = `
+    <div class="edit-area">
+      ${Object.entries(CATEGORIES)
+        .map(
+          ([category, hobbies]) => `
+        <div class="category-edit">
+          <strong>${CATEGORY_EMOJI[category]} ${category}</strong>
+          <button class="select-chip ${state.user.categories.includes(category) ? "active" : ""}" data-action="toggle-profile-category" data-value="${category}">${category} 관심 설정</button>
+          ${
+            state.user.categories.includes(category)
+              ? hobbies
+                  .map(
+                    (hobby) =>
+                      `<button class="select-chip ${state.user.hobbies.includes(hobby) ? "active" : ""}" data-action="toggle-profile-hobby" data-value="${hobby}">${hobby}</button>`
+                  )
+                  .join("")
+              : ""
+          }
+        </div>`
+        )
+        .join("")}
+    </div>`;
+
+  const profileBox = `
+    <div class="profile-box">
+      <h3>관심 취미 카테고리</h3>
+      ${state.user.categories.map((c) => `<span class="profile-chip">${CATEGORY_EMOJI[c]} ${c}</span>`).join("")}
+      <h3>내 취미</h3>
+      ${state.user.hobbies.map((h) => `<span class="profile-chip hobby">#${escapeHtml(h)}</span>`).join("")}
+    </div>`;
+
+  return `
+    <div class="profile-header">
+      <img class="profile-picture" src="${state.user.profileImage}" alt="" />
+      <div class="profile-info">
+        <small>MY HOBBY ARCHIVE</small>
+        <h1>${escapeHtml(state.user.nickname)}</h1>
+        <p>${escapeHtml(state.user.joinedAt)} 가입</p>
+      </div>
+    </div>
+    <button class="edit-button" data-action="toggle-edit-profile">${state.editingProfile ? "취미 선택 완료" : "취미 편집"}</button>
+    ${state.editingProfile ? editArea : profileBox}
+    <div class="record-header">
+      <h2>나의 취미 기록</h2>
+      <button class="add-button" data-action="open-create-post"><span>+</span> 새 기록</button>
+    </div>
+    ${
+      myPosts.length
+        ? myPosts.map(renderPost).join("")
+        : `<div class="empty"><div>🧀</div><h3>첫 취미를 기록해 보세요</h3><p>취미의 과정과 결과물을 한곳에 모을 수 있어요.</p></div>`
+    }
+  `;
+}
+
+function renderCreatePostModal() {
+  return `
+  <div class="modal-bg">
+    <div class="modal">
+      <div class="modal-top">
+        <div><small>MY RECORD</small><h2>취미 기록하기</h2></div>
+        <button data-action="close-create-post">✕</button>
+      </div>
+      <div class="form">
+        <label>취미 카테고리</label>
+        <select data-action="change-new-category">
+          ${Object.keys(CATEGORIES)
+            .map((c) => `<option value="${c}" ${state.newPost.category === c ? "selected" : ""}>${c}</option>`)
+            .join("")}
+        </select>
+        <label>세부 취미</label>
+        <select data-action="change-new-hobby">
+          ${CATEGORIES[state.newPost.category]
+            .map((h) => `<option value="${h}" ${state.newPost.hobby === h ? "selected" : ""}>${h}</option>`)
+            .join("")}
+        </select>
+        <label>사진 또는 영상</label>
+        <input value="${escapeHtml(state.newPost.image)}" placeholder="현재 MVP에서는 이미지 URL" data-field="newPost.image" />
+        <label>오늘의 기록</label>
+        <textarea rows="4" placeholder="오늘 어떤 취미를 즐기셨나요?" data-field="newPost.caption">${escapeHtml(state.newPost.caption)}</textarea>
+        <button class="upload" data-action="submit-new-post"><span>📷</span> 게시하기</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderTab() {
+  if (state.tab === "feed") return renderFeed();
+  if (state.tab === "search") return renderSearch();
+  if (state.tab === "bookmark") return renderBookmark();
+  if (state.tab === "profile") return renderProfile();
+  return "";
+}
+
+function navButton(tab, icon, label) {
+  return `<button class="nav ${state.tab === tab ? "active" : ""}" data-action="set-tab" data-value="${tab}"><span class="nav-icon">${icon}</span><span class="nav-label">${label}</span></button>`;
+}
+
+function renderApp() {
+  return `
+  <div class="app">
+    <header class="topbar"><div class="logo"><span>🧀</span> 취이즈</div></header>
+    <main class="container">${renderTab()}</main>
+    <nav class="bottom-nav">
+      ${navButton("feed", "🏠", "피드")}
+      ${navButton("search", "🔍", "검색")}
+      ${navButton("bookmark", "🔖", "북마크")}
+      ${navButton("profile", "👤", "프로필")}
+    </nav>
+  </div>
+  ${state.creatingPost ? renderCreatePostModal() : ""}
+  `;
+}
+
+function render() {
+  const root = document.getElementById("root");
+  root.innerHTML = state.onboarded ? renderApp() : renderOnboarding();
+}
+
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest("[data-action]");
+  if (!btn || btn.tagName === "FORM") return;
+  const action = btn.dataset.action;
+  const id = btn.dataset.id ? Number(btn.dataset.id) : null;
+  const value = btn.dataset.value;
+
+  switch (action) {
+    case "toggle-onboard-category":
+      toggleArrayField(state.user, "categories", value);
+      render();
+      break;
+    case "finish-onboarding":
+      if (state.user.categories.length) {
+        state.onboarded = true;
+        render();
+      }
+      break;
+    case "set-tab":
+      state.tab = value;
+      render();
+      break;
+    case "toggle-like":
+      toggleLike(id);
+      render();
+      break;
+    case "toggle-bookmark":
+      toggleBookmark(id);
+      render();
+      break;
+    case "toggle-refresh":
+      state.refresh = !state.refresh;
+      render();
+      break;
+    case "clear-search":
+      state.searchInput = "";
+      state.searchQuery = "";
+      render();
+      break;
+    case "search-history":
+      doSearch(value);
+      render();
+      break;
+    case "toggle-edit-profile":
+      state.editingProfile = !state.editingProfile;
+      render();
+      break;
+    case "toggle-profile-category":
+      toggleArrayField(state.user, "categories", value);
+      render();
+      break;
+    case "toggle-profile-hobby":
+      toggleArrayField(state.user, "hobbies", value);
+      render();
+      break;
+    case "open-create-post":
+      openCreatePost();
+      render();
+      break;
+    case "close-create-post":
+      state.creatingPost = false;
+      render();
+      break;
+    case "submit-new-post":
+      submitNewPost();
+      break;
+  }
+});
+
+document.addEventListener("submit", function (e) {
+  const form = e.target.closest('[data-action="search-submit"]');
+  if (form) {
+    e.preventDefault();
+    doSearch(state.searchInput);
+    render();
+  }
+});
+
+document.addEventListener("input", function (e) {
+  const field = e.target.dataset.field;
+  if (!field) return;
+  if (field === "searchInput") {
+    state.searchInput = e.target.value;
+    return;
+  }
+  if (field.startsWith("newPost.")) {
+    const key = field.split(".")[1];
+    state.newPost[key] = e.target.value;
+  }
+});
+
+document.addEventListener("change", function (e) {
+  if (e.target.dataset.action === "change-new-category") {
+    state.newPost.category = e.target.value;
+    state.newPost.hobby = CATEGORIES[e.target.value][0];
+    render();
+  } else if (e.target.dataset.action === "change-new-hobby") {
+    state.newPost.hobby = e.target.value;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
